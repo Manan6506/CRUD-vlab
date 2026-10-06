@@ -1,0 +1,18 @@
+{% comment %}
+  Shows what an operation maps to: its SQL, the ORM call, and the HTTP request.
+  Included by the create / update / delete pages, which supply `operation`,
+  `sql`, `orm` and `http` in their context.
+{% endcomment %}
+<div class="card">
+  <div class="card-top">
+    <span class="op op-{{ operation }}">{{ operation }}</span>
+    <span class="lbl">maps to</span>
+    <span class="meta">HTTP: <code>{{ http }}</code></span>
+  </div>
+  <div class="card-body">
+    <div class="pair">
+      <div class="code"><div class="cap">SQL equivalent</div><pre>{{ sql }}</pre></div>
+      <div class="code soft"><div class="cap">Django ORM (what the view runs)</div><pre>{{ orm }}</pre></div>
+    </div>
+  </div>
+</div>

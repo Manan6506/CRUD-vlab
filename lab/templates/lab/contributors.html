@@ -1,0 +1,27 @@
+{% extends 'lab/base.html' %}
+{% block title %}Contributors{% endblock %}
+
+{% block head %}
+  {% include 'lab/_pagehead.html' with kicker='Section 11 · More' title='Contributors' sub=institution %}
+{% endblock %}
+
+{% block content %}
+  <div class="index-grid">
+    {% for person in contributors %}
+      <div class="index-card" style="cursor:default">
+        <span class="ic"><svg><use href="#i-users"></use></svg></span>
+        <b>{{ person.name }}</b>
+        <span>{{ person.role }}<br><span style="color:var(--ink-4)">{{ person.affiliation }}</span></span>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="callout" style="margin-top:22px">
+    <svg class="ic"><use href="#i-info"></use></svg>
+    <div>
+      <b>Placeholder names.</b> Edit <code>lab/content.py</code> — the <code>CONTRIBUTORS</code>
+      list and <code>INSTITUTION</code> near the bottom of the file — to show your team's real
+      details.
+    </div>
+  </div>
+{% endblock %}

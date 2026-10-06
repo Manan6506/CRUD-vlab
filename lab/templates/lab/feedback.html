@@ -1,0 +1,67 @@
+{% extends 'lab/base.html' %}
+{% block title %}Feedback{% endblock %}
+
+{% block head %}
+  {% include 'lab/_pagehead.html' with kicker='Section 12 · More' title='Feedback' sub='Tell us what worked and what did not. Your response is stored and reviewed by the lab instructor.' %}
+{% endblock %}
+
+{% block content %}
+  <div class="card" style="max-width:580px">
+    <div class="card-top">
+      <span class="lbl">Your response</span>
+      <span class="meta">{{ responses_so_far }} received</span>
+    </div>
+    <div class="card-body">
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+          <div class="errors" style="margin-bottom:16px">{{ form.non_field_errors|striptags }}</div>
+        {% endif %}
+
+        <div class="field">
+          <label for="{{ form.name.id_for_label }}">Name</label>
+          {{ form.name }}
+          {% if form.name.errors %}<div class="errors">{{ form.name.errors|striptags }}</div>{% endif %}
+        </div>
+
+        <div class="field">
+          <label for="{{ form.email.id_for_label }}">Email <span class="type">optional</span></label>
+          {{ form.email }}
+          {% if form.email.errors %}<div class="errors">{{ form.email.errors|striptags }}</div>{% endif %}
+        </div>
+
+        <div class="field">
+          <label>{{ form.rating.label }}</label>
+          <ul class="choices">
+            {% for choice in form.rating %}
+              <li><label>{{ choice.tag }} <span>{{ choice.choice_label }}</span></label></li>
+            {% endfor %}
+          </ul>
+          {% if form.rating.errors %}<div class="errors">{{ form.rating.errors|striptags }}</div>{% endif %}
+        </div>
+
+        <div class="field">
+          <label for="{{ form.comments.id_for_label }}">Comments</label>
+          {{ form.comments }}
+          <div class="help">At least 15 characters. If you rate the experiment 1 or 2, please
+            describe the problem in at least 40 characters.</div>
+          {% if form.comments.errors %}<div class="errors">{{ form.comments.errors|striptags }}</div>{% endif %}
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" type="submit">Submit feedback</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="callout" style="margin-top:20px">
+    <svg class="ic"><use href="#i-info"></use></svg>
+    <div>
+      <b>Where this goes.</b> Submissions are stored in the <code>Feedback</code> table and can be
+      reviewed, filtered by rating and searched in the
+      <a href="/admin/lab/feedback/">Django admin</a>.
+    </div>
+  </div>
+{% endblock %}

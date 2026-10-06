@@ -1,0 +1,110 @@
+{% comment %}
+  Shared body for the Pretest and the Posttest. Including one partial from both
+  pages keeps the two tests identical in behaviour; only the wording differs.
+{% endcomment %}
+
+{% if attempt %}
+  {# ---- submitted: show the score and an answer review ---- #}
+  <div class="card">
+    <div class="card-top">
+      <span class="lbl">Result</span>
+      <span class="meta">submitted {{ attempt.submitted_at|date:"j M Y, H:i" }}</span>
+    </div>
+    <div class="card-body" style="text-align:center; padding:34px 20px">
+      <div style="font: 700 52px/1 var(--mono); letter-spacing:-.03em;
+                  color:{% if attempt.passed %}var(--create){% else %}var(--update){% endif %}">
+        {{ attempt.score }}<span style="color:var(--ink-4); font-size:30px">/{{ attempt.total }}</span>
+      </div>
+      <div class="track" style="max-width:260px; margin:20px auto 12px;
+                                {% if attempt.passed %}--brand:var(--create){% endif %}">
+        <i style="width:{{ attempt.percentage }}%"></i>
+      </div>
+      <p style="margin:0; color:var(--ink-3); font-size:14.5px">
+        {{ attempt.percentage }}% —
+        {% if attempt.passed %}pass{% else %}below the 60% pass mark{% endif %}
+      </p>
+    </div>
+  </div>
+
+  <h2 class="rule">Answer review</h2>
+  {% for answer in results %}
+    <div class="card">
+      <div class="card-body">
+        <p style="margin:0 0 11px; font-weight:600; font-size:15.5px; letter-spacing:-.015em">
+          {{ forloop.counter }}. {{ answer.question.text }}
+        </p>
+        <p style="margin:0 0 7px; font-size:14px; color:var(--ink-3)">
+          Your answer:
+          <strong style="color:{% if answer.is_correct %}var(--create){% else %}var(--delete){% endif %}">
+            {{ answer.choice.text }} {% if answer.is_correct %}✓{% else %}✗{% endif %}
+          </strong>
+        </p>
+        {% if not answer.is_correct %}
+          <p style="margin:0 0 7px; font-size:14px; color:var(--create)">
+            Correct answer: <strong>{{ answer.question.correct_choice.text }}</strong>
+          </p>
+        {% endif %}
+        {% if answer.question.explanation %}
+          <p style="margin:0; font-size:13.5px; color:var(--ink-3); line-height:1.6">
+            {{ answer.question.explanation }}
+          </p>
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+
+  <div class="actions">
+    <a class="btn" href="">Take the test again</a>
+    {% if nav_next %}
+      <a class="btn btn-primary" href="{{ nav_next.url }}">
+        Continue to {{ nav_next.label }} <svg><use href="#i-arrow"></use></svg>
+      </a>
+    {% endif %}
+  </div>
+
+{% else %}
+  {# ---- not submitted: show the form ---- #}
+  {% if questions %}
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <ul class="alerts"><li class="error">{{ form.non_field_errors|striptags }}</li></ul>
+      {% endif %}
+
+      {% for field in form %}
+        <div class="card">
+          <div class="card-top">
+            <span class="lbl">Question {{ forloop.counter }} / {{ questions|length }}</span>
+          </div>
+          <div class="card-body">
+            <p style="margin:0 0 15px; font-weight:600; font-size:15.5px; letter-spacing:-.015em">
+              {{ field.label }}
+            </p>
+            <ul class="choices">
+              {% for choice in field %}
+                <li><label>{{ choice.tag }} <span>{{ choice.choice_label }}</span></label></li>
+              {% endfor %}
+            </ul>
+            {% if field.errors %}
+              <div class="errors">{{ field.errors|striptags }}</div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+
+      <div class="actions">
+        <button class="btn btn-primary" type="submit">Submit {{ stage_label }}</button>
+        <span style="font-size:13px; color:var(--ink-3)">
+          Recorded anonymously — no login required.
+        </span>
+      </div>
+    </form>
+  {% else %}
+    <div class="card"><div class="blank">
+      <p>No questions have been added to this test yet.</p>
+      <p style="font-size:13.5px">An instructor can add them in the
+        <a href="/admin/lab/question/">Django admin</a>.</p>
+    </div></div>
+  {% endif %}
+{% endif %}

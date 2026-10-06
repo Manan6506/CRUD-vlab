@@ -1,0 +1,9 @@
+{% comment %}Tab strip for the two Simulation modes.{% endcomment %}
+<div class="tabs">
+  <a href="{% url 'students:simulator' %}" class="{% if tab == 'visual' %}on{% endif %}">
+    <svg><use href="#i-form"></use></svg> Visual
+  </a>
+  <a href="{% url 'students:terminal' %}" class="{% if tab == 'terminal' %}on{% endif %}">
+    <svg><use href="#i-terminal"></use></svg> Terminal
+  </a>
+</div>

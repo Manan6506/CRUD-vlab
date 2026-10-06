@@ -1,0 +1,283 @@
+{% extends 'lab/base.html' %}
+{% block title %}Terminal{% endblock %}
+
+{% block head %}
+  {% include 'lab/_pagehead.html' with kicker='Section 7 · Perform' title='Simulation — Terminal' sub='Perform the same four operations by typing them. Switch between SQL and Django ORM to run the identical operation each way and compare the two.' %}
+{% endblock %}
+
+{% block content %}
+  {% include 'students/_tabs.html' with tab='terminal' %}
+
+  <div class="term">
+    <div class="term-head">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span class="ttl">students@virtual-lab — simulated shell</span>
+      <span class="sp"></span>
+      <span class="modes" id="mode-switch">
+        <button type="button" data-mode="sql">SQL</button>
+        <button type="button" data-mode="orm">ORM</button>
+      </span>
+    </div>
+
+    <div class="term-out" id="screen" tabindex="0"></div>
+
+    <div class="term-in">
+      <span class="pr" id="prompt">sql&gt;</span>
+      <input id="cmd" type="text" autocomplete="off" autocapitalize="off"
+             spellcheck="false" aria-label="Terminal command"
+             placeholder="type a statement and press Enter — try: help">
+    </div>
+  </div>
+
+  <div class="snippets" id="hints"></div>
+
+  <div class="callout" style="margin-top:22px">
+    <svg class="ic"><use href="#i-info"></use></svg>
+    <div>
+      <b>This terminal is simulated.</b> It is not a shell: there is no filesystem and nothing is
+      evaluated as code. What you type is <em>parsed</em> into one of the four operations and then
+      carried out through the Django ORM against the real <code>students</code> table — which is
+      why the same command can be shown to you as both SQL and ORM.
+    </div>
+  </div>
+
+  {% csrf_token %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  'use strict';
+
+  var screenEl = document.getElementById('screen');
+  var input    = document.getElementById('cmd');
+  var promptEl = document.getElementById('prompt');
+  var hintsEl  = document.getElementById('hints');
+  var switchEl = document.getElementById('mode-switch');
+  var csrf     = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+  // The view passes the initial mode; anything other than 'orm' means SQL.
+  var mode = '{{ mode }}' === 'orm' ? 'orm' : 'sql';
+
+  var history = [];
+  var historyIndex = -1;
+
+  var EXAMPLES = {
+    sql: [
+      'SELECT * FROM students;',
+      "SELECT name, email FROM students WHERE name LIKE '%a%';",
+      'SELECT COUNT(*) FROM students;',
+      "INSERT INTO students (name, email, phone) VALUES ('New Student', 'new@example.com', '9000000001');",
+      "UPDATE students SET phone = '9000000002' WHERE id = 1;",
+      'DELETE FROM students WHERE id = 5;',
+      'describe',
+      'help'
+    ],
+    orm: [
+      'Student.objects.all()',
+      "Student.objects.filter(name__icontains='a')",
+      'Student.objects.count()',
+      "Student.objects.create(name='New Student', email='new@example.com', phone='9000000001')",
+      "Student.objects.filter(pk=1).update(phone='9000000002')",
+      'Student.objects.filter(pk=5).delete()',
+      'describe',
+      'help'
+    ]
+  };
+
+  // ---- rendering helpers -------------------------------------------------
+
+  function el(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) { node.className = className; }
+    if (text !== undefined) { node.textContent = text; }
+    return node;
+  }
+
+  function write(node) {
+    screenEl.appendChild(node);
+    screenEl.scrollTop = screenEl.scrollHeight;
+  }
+
+  function line(text, className) {
+    write(el('div', 'tl ' + (className || ''), text));
+  }
+
+  function echo(command) {
+    var row = el('div', 'tl tl-echo');
+    row.appendChild(el('span', 'pr', (mode === 'sql' ? 'sql> ' : 'orm> ')));
+    row.appendChild(document.createTextNode(command));
+    write(row);
+  }
+
+  function renderTable(columns, rows) {
+    var table = el('table', 't-tbl');
+    var head = el('thead');
+    var headRow = el('tr');
+    columns.forEach(function (column) { headRow.appendChild(el('th', '', column)); });
+    head.appendChild(headRow);
+    table.appendChild(head);
+
+    var body = el('tbody');
+    rows.forEach(function (row) {
+      var tr = el('tr');
+      row.forEach(function (cell) {
+        tr.appendChild(el('td', '', cell === null ? 'NULL' : String(cell)));
+      });
+      body.appendChild(tr);
+    });
+    table.appendChild(body);
+    write(table);
+  }
+
+  // Show whichever form of the command the student did NOT type.
+  function renderEquivalent(data) {
+    if (!data.sql && !data.orm) { return; }
+    var box = el('div', 't-eq');
+    var other = mode === 'sql'
+      ? { label: 'Django ORM equivalent', text: data.orm }
+      : { label: 'SQL equivalent', text: data.sql };
+    if (!other.text) { return; }
+    box.appendChild(el('div', '', other.label + ':'));
+    var code = el('code', '', other.text.replace(/\n/g, ' '));
+    box.appendChild(code);
+    write(box);
+  }
+
+  function banner() {
+    line('Virtual Lab — simulated database terminal', 't-info');
+    line('Table: students (id, name, email, phone).  No shell, no filesystem.', 't-dim');
+    line("Type `help` for the commands available in this mode.", 't-dim');
+    line('');
+  }
+
+  // ---- running a command -------------------------------------------------
+
+  function run(command) {
+    echo(command);
+    if (!command.trim()) { return Promise.resolve(); }
+
+    history.push(command);
+    historyIndex = history.length;
+
+    return fetch('{% url "students:terminal_run" %}', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
+      body: JSON.stringify({ command: command, mode: mode })
+    })
+      .then(function (response) { return response.json(); })
+      .then(render)
+      .catch(function () { line('Could not reach the server.', 't-err'); });
+  }
+
+  function render(data) {
+    if (data.kind === 'clear') { screenEl.innerHTML = ''; banner(); return; }
+
+    if (data.kind === 'error') {
+      line('ERROR: ' + data.message, 't-err');
+      line('');
+      return;
+    }
+
+    if (data.kind === 'help' || data.kind === 'describe') {
+      if (data.message) { line(data.message, 't-info'); }
+      if (data.columns.length) { renderTable(data.columns, data.rows); }
+      line('');
+      return;
+    }
+
+    if (data.kind === 'table') {
+      if (data.rows.length) {
+        renderTable(data.columns, data.rows);
+      } else {
+        line('(0 rows)', 't-dim');
+      }
+      line(data.message, 't-dim');
+    } else {
+      line(data.message, 't-ok');
+    }
+
+    renderEquivalent(data);
+    line('');
+    updateRowCount(data.row_count);
+  }
+
+  function updateRowCount(count) {
+    if (typeof count !== 'number') { return; }
+    var chip = document.querySelector('.topbar .chip');
+    if (chip) {
+      chip.innerHTML = '<i class="dot"></i>students · <b>' + count + '</b> row'
+        + (count === 1 ? '' : 's');
+    }
+  }
+
+  // ---- mode switching ----------------------------------------------------
+
+  function setMode(next, announce) {
+    mode = next;
+    promptEl.textContent = next + '>';
+    input.placeholder = next === 'sql'
+      ? "type a statement and press Enter — try: SELECT * FROM students;"
+      : 'type an expression and press Enter — try: Student.objects.all()';
+
+    switchEl.querySelectorAll('button').forEach(function (button) {
+      button.classList.toggle('on', button.dataset.mode === next);
+    });
+
+    renderHints();
+    if (announce) {
+      line('-- switched to ' + (next === 'sql' ? 'SQL' : 'Django ORM') + ' mode --', 't-warn');
+      line('');
+    }
+    input.focus();
+  }
+
+  function renderHints() {
+    hintsEl.innerHTML = '';
+    EXAMPLES[mode].forEach(function (example) {
+      var button = el('button', '', example.length > 46
+        ? example.slice(0, 44) + '…' : example);
+      button.type = 'button';
+      button.title = example;
+      button.addEventListener('click', function () {
+        input.value = example;
+        input.focus();
+      });
+      hintsEl.appendChild(button);
+    });
+  }
+
+  switchEl.addEventListener('click', function (event) {
+    var button = event.target.closest('button');
+    if (button && button.dataset.mode !== mode) { setMode(button.dataset.mode, true); }
+  });
+
+  // ---- input handling ----------------------------------------------------
+
+  input.addEventListener('keydown', function (event) {
+    if (event.key === 'Enter') {
+      var command = input.value;
+      input.value = '';
+      run(command);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      if (historyIndex > 0) { historyIndex--; input.value = history[historyIndex]; }
+    } else if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      if (historyIndex < history.length - 1) {
+        historyIndex++; input.value = history[historyIndex];
+      } else { historyIndex = history.length; input.value = ''; }
+    } else if (event.key === 'l' && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault();
+      screenEl.innerHTML = ''; banner();
+    }
+  });
+
+  screenEl.addEventListener('click', function () { input.focus(); });
+
+  // ---- start -------------------------------------------------------------
+  banner();
+  setMode(mode, false);
+})();
+</script>
+{% endblock %}

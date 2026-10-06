@@ -1,0 +1,68 @@
+{% extends 'lab/base.html' %}
+{% block title %}Introduction{% endblock %}
+
+{% block head %}
+  {% include 'lab/_pagehead.html' with kicker='Section 2 · Understand' title='Introduction' sub='Why every data-driven application reduces to four operations, and what you will build and observe here.' %}
+{% endblock %}
+
+{% block content %}
+  <h2 class="rule">What is CRUD?</h2>
+  <div class="prose">
+    <p>
+      Almost every application that stores information does only four things with it: it
+      <strong>creates</strong> new records, <strong>reads</strong> records back,
+      <strong>updates</strong> records that have changed, and <strong>deletes</strong> records
+      that are no longer needed. These four are known collectively by the acronym
+      <strong>CRUD</strong>.
+    </p>
+    <p>
+      The acronym is useful because it is the same everywhere. A college admission portal, a
+      bank's account register and a social network's profile store differ enormously in scale and
+      purpose, yet each is built from these four operations repeated over different tables. Learn
+      them once on a small table and the pattern transfers directly.
+    </p>
+  </div>
+
+  <h2 class="rule">Why a relational table?</h2>
+  <div class="prose">
+    <p>
+      A <em>relational</em> database stores data in tables of rows and columns. Each column has a
+      declared type, and each row is one record. Crucially, the database can enforce
+      <strong>constraints</strong> — rules it refuses to let you break, no matter what the
+      application asks it to do.
+    </p>
+    <p>
+      That distinction is central to this experiment. Application code can and should check input
+      before sending it, but the database is the last line of defence and will refuse a bad write
+      even when the application forgets to. You will see both layers: a Django form rejecting a
+      malformed phone number, and the database itself rejecting a duplicate email address.
+    </p>
+  </div>
+
+  <h2 class="rule">What you will work with</h2>
+  <div class="prose">
+    <p>
+      The experiment uses a single table, <code>students</code>, holding four columns: an
+      <code>id</code> that identifies each row, plus a <code>name</code>, <code>email</code> and
+      <code>phone</code>. It is deliberately small, so nothing distracts from the operations
+      themselves.
+    </p>
+    <p>
+      The Simulation section lets you perform each operation against this live table two ways —
+      through forms, or by typing SQL and ORM commands into a terminal. Either way you see what
+      you did, the <strong>SQL statement</strong> it corresponds to, and the <strong>Django ORM
+      call</strong> that produced it. Every statement is recorded in a log, which is also what the
+      Exercises section uses to check your work automatically.
+    </p>
+  </div>
+
+  <div class="callout">
+    <svg class="ic"><use href="#i-info"></use></svg>
+    <div>
+      <b>About the technology.</b> The experiment is built with Django, a Python web framework,
+      over an SQLite database. You do not need to know Django to perform the experiment — but the
+      Theory section explains how a request travels through it, because seeing that path is part
+      of the point.
+    </div>
+  </div>
+{% endblock %}

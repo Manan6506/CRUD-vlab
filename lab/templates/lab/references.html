@@ -1,0 +1,26 @@
+{% extends 'lab/base.html' %}
+{% block title %}References{% endblock %}
+
+{% block head %}
+  {% include 'lab/_pagehead.html' with kicker='Section 10 · More' title='References' sub='Documentation and further reading on the concepts used in this experiment.' %}
+{% endblock %}
+
+{% block content %}
+  <div class="index-grid">
+    {% for reference in references %}
+      {% if reference.url %}
+        <a class="index-card" href="{{ reference.url }}" target="_blank" rel="noopener">
+          <span class="ic"><svg><use href="#i-link"></use></svg></span>
+          <b>{{ reference.title }}</b>
+          <span>{{ reference.detail|safe }}</span>
+        </a>
+      {% else %}
+        <div class="index-card" style="cursor:default">
+          <span class="ic"><svg><use href="#i-book"></use></svg></span>
+          <b>{{ reference.title }}</b>
+          <span>{{ reference.detail|safe }}</span>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+{% endblock %}

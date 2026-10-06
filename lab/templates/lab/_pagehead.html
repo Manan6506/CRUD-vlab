@@ -1,0 +1,9 @@
+{% comment %}
+  Standard page heading. Included by each section with:
+      {% include 'lab/_pagehead.html' with kicker='…' title='…' sub='…' %}
+{% endcomment %}
+<div class="page-head">
+  <span class="kicker">{{ kicker }}</span>
+  <h1 class="page-title">{{ title }}</h1>
+  {% if sub %}<p class="sub">{{ sub|safe }}</p>{% endif %}
+</div>

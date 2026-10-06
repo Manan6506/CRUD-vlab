@@ -1,0 +1,88 @@
+{% extends 'lab/base.html' %}
+{% block title %}Aim{% endblock %}
+
+{% block head %}
+  <section class="hero">
+    <span class="kicker">Database Systems · Experiment 1</span>
+    <h1>Performing CRUD Operations on a Relational Database</h1>
+    <p>
+      Create, Read, Update and Delete — the four operations every data-driven application is
+      built from. Perform each one on a live table and see the SQL statement and the Django ORM
+      call behind it.
+    </p>
+    <div class="flow">
+      <span>CREATE</span><i>→</i><span>READ</span><i>→</i><span>UPDATE</span><i>→</i><span>DELETE</span>
+    </div>
+  </section>
+{% endblock %}
+
+{% block content %}
+  <h2 class="rule">Aim</h2>
+  <div class="prose">
+    <p style="font-size:17px; color:var(--ink-2)">
+      To perform and observe the four fundamental persistent-storage operations on a relational
+      database table, and to relate each operation to the SQL statement, the HTTP method and the
+      Django ORM call that carries it out.
+    </p>
+  </div>
+
+  <h2 class="rule">Learning outcomes</h2>
+  <div class="prose">
+    <p>After completing this experiment, you will be able to:</p>
+    <ul>
+      <li>Describe the four CRUD operations and name the SQL statement for each.</li>
+      <li>Explain how a primary key identifies a row, and why identifiers are never reused.</li>
+      <li>Demonstrate how a <code>UNIQUE</code> constraint causes the database to refuse a write.</li>
+      <li>Trace one operation through Django's URL → view → form → model → template path.</li>
+      <li>Distinguish validation performed by the application from constraints enforced by the database.</li>
+      <li>Carry out the same operation three ways: through a form, by typing SQL, and in the ORM.</li>
+    </ul>
+  </div>
+
+  <h2 class="rule">The four operations</h2>
+  <div class="tiles">
+    <div class="tile">
+      <span class="op op-CREATE">CREATE</span>
+      <h4>INSERT INTO students</h4>
+      <p>Add a new row. The database assigns the primary key — you never supply it.</p>
+    </div>
+    <div class="tile">
+      <span class="op op-READ">READ</span>
+      <h4>SELECT FROM students</h4>
+      <p>Retrieve rows, with or without a condition. Changes nothing.</p>
+    </div>
+    <div class="tile">
+      <span class="op op-UPDATE">UPDATE</span>
+      <h4>UPDATE students SET …</h4>
+      <p>Rewrite columns of an existing row, located by its id. The id is preserved.</p>
+    </div>
+    <div class="tile">
+      <span class="op op-DELETE">DELETE</span>
+      <h4>DELETE FROM students</h4>
+      <p>Remove a row permanently. Its identifier is retired and never reissued.</p>
+    </div>
+  </div>
+
+  <h2 class="rule">Sections of this experiment</h2>
+  <div class="index-grid">
+    {% for entry in nav_sections %}
+      <a class="index-card" href="{{ entry.url }}">
+        <span class="n">{{ entry.number }}</span>
+        <span class="ic"><svg><use href="#i-{{ entry.icon }}"></use></svg></span>
+        <b>{{ entry.label }}</b>
+        <span>{{ entry.blurb }}</span>
+      </a>
+    {% endfor %}
+  </div>
+
+  <div class="callout" style="margin-top:26px">
+    <svg class="ic"><use href="#i-info"></use></svg>
+    <div>
+      <b>How to work through this.</b> Follow the sections in order using the rail on the left.
+      Start with the <a href="{% url 'lab:pretest' %}">Pretest</a>, read the
+      <a href="{% url 'lab:theory' %}">Theory</a>, then carry out the operations yourself in the
+      <a href="{% url 'students:simulator' %}">Simulation</a> — through the forms, or by typing
+      commands in the <a href="{% url 'students:terminal' %}">terminal</a>.
+    </div>
+  </div>
+{% endblock %}

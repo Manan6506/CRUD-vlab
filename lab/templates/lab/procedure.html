@@ -1,0 +1,37 @@
+{% extends 'lab/base.html' %}
+{% block title %}Procedure{% endblock %}
+
+{% block head %}
+  {% include 'lab/_pagehead.html' with kicker='Section 6 · Perform' title='Procedure' sub='The order in which to work through the experiment. Each step takes a few minutes; the whole experiment takes about half an hour.' %}
+{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <div class="card-body">
+      <ol class="steps">
+        {% for title, body in steps %}
+          <li>
+            <h4>{{ title }}</h4>
+            <p>{{ body|safe }}</p>
+          </li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+
+  <div class="callout">
+    <svg class="ic"><use href="#i-info"></use></svg>
+    <div>
+      <b>If you need to start over.</b> The <strong>Reset</strong> button on the Simulation page
+      restores the table to its original four rows (with ids 1–4) and clears the statement log.
+      Resetting also clears your exercise progress, since progress is measured from the log.
+    </div>
+  </div>
+
+  <div class="actions">
+    <a class="btn btn-primary" href="{% url 'students:simulator' %}">
+      Go to the Simulation <svg><use href="#i-arrow"></use></svg>
+    </a>
+    <a class="btn" href="{% url 'students:terminal' %}">Open the terminal instead</a>
+  </div>
+{% endblock %}

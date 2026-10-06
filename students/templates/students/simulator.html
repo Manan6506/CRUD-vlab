@@ -1,0 +1,164 @@
+{% extends 'lab/base.html' %}
+{% block title %}Simulation{% endblock %}
+
+{% block head %}
+  {% include 'lab/_pagehead.html' with kicker='Section 7 · Perform' title='Simulation' sub='Perform each operation on the live <code>students</code> table. Every statement is shown in SQL and in Django ORM form, and recorded in the log at the foot of this page.' %}
+{% endblock %}
+
+{% block content %}
+  {% include 'students/_tabs.html' with tab='visual' %}
+
+  <div class="tiles" style="margin-bottom:22px">
+    <div class="tile">
+      <span class="op op-CREATE">CREATE</span>
+      <h4>INSERT INTO students</h4>
+      <p>Add one new row. The database assigns the primary key.</p>
+      <a class="btn btn-c btn-sm btn-mono" href="{% url 'students:create' %}">Insert a row →</a>
+    </div>
+    <div class="tile">
+      <span class="op op-READ">READ</span>
+      <h4>SELECT FROM students</h4>
+      <p>Retrieve rows, with or without a WHERE clause. Changes nothing.</p>
+      <a class="btn btn-r btn-sm btn-mono" href="?q=">Run SELECT ↓</a>
+    </div>
+    <div class="tile">
+      <span class="op op-UPDATE">UPDATE</span>
+      <h4>UPDATE students SET …</h4>
+      <p>Rewrite columns of one existing row, located by its id.</p>
+      <span class="btn btn-u btn-sm btn-mono" style="cursor:default">Pick a row below ↓</span>
+    </div>
+    <div class="tile">
+      <span class="op op-DELETE">DELETE</span>
+      <h4>DELETE FROM students</h4>
+      <p>Remove one row permanently. The id is never reused.</p>
+      <span class="btn btn-d btn-sm btn-mono" style="cursor:default">Pick a row below ↓</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-top">
+      <span class="lbl">Relation · students</span>
+      <span class="meta">
+        {{ students|length }} row{{ students|length|pluralize }} returned{% if query %} · filtered{% endif %}
+      </span>
+      <form method="post" action="{% url 'students:reset' %}" style="margin:0">
+        {% csrf_token %}
+        <button class="btn btn-sm btn-mono" type="submit"
+                onclick="return confirm('Reset the table to its initial 4 rows and clear the statement log? This also clears your exercise progress.')">
+          ↺ Reset
+        </button>
+      </form>
+    </div>
+
+    <div class="card-body" style="padding-bottom:0">
+      <form method="get" action="{% url 'students:simulator' %}"
+            style="display:flex; gap:9px; margin-bottom:18px; flex-wrap:wrap">
+        <input type="search" name="q" value="{{ query }}" style="flex:1; min-width:220px"
+               placeholder="WHERE name / email / phone LIKE '%…%'   — leave blank to select all">
+        <button class="btn btn-r btn-mono" type="submit">Run SELECT</button>
+        {% if query %}<a class="btn btn-mono" href="?q=">Clear</a>{% endif %}
+      </form>
+    </div>
+
+    <div class="tbl">
+      {% if students %}
+        <table>
+          <thead>
+            <tr>
+              <th>id <small>INTEGER · PK</small></th>
+              <th>name <small>VARCHAR(100)</small></th>
+              <th>email <small>VARCHAR(254) · UNIQUE</small></th>
+              <th>phone <small>VARCHAR(16)</small></th>
+              <th><small>row operations</small></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for student in students %}
+              <tr>
+                <td class="pk">{{ student.id }}</td>
+                <td style="color:var(--ink); font-weight:500">{{ student.name }}</td>
+                <td class="mono" style="font-size:13px">{{ student.email }}</td>
+                <td class="mono" style="font-size:13px">{{ student.phone }}</td>
+                <td class="act">
+                  <a class="btn btn-r btn-sm btn-mono" href="{% url 'students:detail' student.pk %}">SELECT</a>
+                  <a class="btn btn-u btn-sm btn-mono" href="{% url 'students:update' student.pk %}">UPDATE</a>
+                  <a class="btn btn-d btn-sm btn-mono" href="{% url 'students:delete' student.pk %}">DELETE</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="blank">
+          {% if query %}
+            <p>The SELECT returned <strong>0 rows</strong> — no row satisfies the WHERE clause.</p>
+            <a class="btn btn-mono" href="?q=">Select all rows</a>
+          {% else %}
+            <p>The table is empty — every row has been deleted.</p>
+            <div class="actions" style="justify-content:center">
+              <form method="post" action="{% url 'students:reset' %}" style="margin:0">
+                {% csrf_token %}
+                <button class="btn btn-primary btn-mono" type="submit">Load the sample rows</button>
+              </form>
+              <a class="btn btn-c btn-mono" href="{% url 'students:create' %}">Insert a row</a>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-top">
+      <span class="op op-READ">READ</span>
+      <span class="lbl">{% if ran_select %}statement executed{% else %}statement behind this view{% endif %}</span>
+      <span class="meta">{% if not ran_select %}press Run SELECT to execute and log it{% endif %}</span>
+    </div>
+    <div class="card-body">
+      <div class="pair">
+        <div class="code"><div class="cap">SQL equivalent</div><pre>{{ sql }}</pre></div>
+        <div class="code soft"><div class="cap">Django ORM</div><pre>{{ orm }}</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card flush">
+    <div class="card-top">
+      <span class="lbl">Statement log</span>
+      <span class="meta">
+        {% if log_total %}last {{ log|length }} of {{ log_total }}{% else %}nothing run yet{% endif %}
+      </span>
+    </div>
+    {% if log %}
+      <div class="tbl">
+        <table>
+          <thead>
+            <tr><th>Time</th><th>Op</th><th>Statement</th><th>Rows</th><th>Outcome</th></tr>
+          </thead>
+          <tbody>
+            {% for entry in log %}
+              <tr>
+                <td class="mono" style="white-space:nowrap; color:var(--ink-4); font-size:13px">
+                  {{ entry.at|date:"H:i:s" }}
+                </td>
+                <td><span class="op op-{{ entry.operation }}">{{ entry.operation }}</span></td>
+                <td style="min-width:250px">
+                  <div class="code" style="margin:0"><pre>{{ entry.sql }}</pre></div>
+                </td>
+                <td class="mono" style="text-align:center">{{ entry.rows_affected }}</td>
+                <td style="min-width:165px; font-size:13px">
+                  <strong style="color:{% if entry.rejected %}var(--delete){% else %}var(--create){% endif %}">
+                    {{ entry.get_status_display }}
+                  </strong>
+                  <div style="color:var(--ink-3); margin-top:3px">{{ entry.note }}</div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="blank"><p>No statements executed yet. Run an operation above.</p></div>
+    {% endif %}
+  </div>
+{% endblock %}

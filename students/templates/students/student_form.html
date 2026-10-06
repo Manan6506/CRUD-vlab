@@ -1,0 +1,59 @@
+{% extends 'lab/base.html' %}
+{% block title %}{{ operation }}{% endblock %}
+
+{% block head %}
+  {% include 'lab/_pagehead.html' with kicker=operation title=title sub=lead %}
+{% endblock %}
+
+{% block content %}
+  {% include 'students/_opspec.html' %}
+
+  <div class="card" style="max-width:560px">
+    <div class="card-top">
+      <span class="lbl">Input</span>
+      <span class="meta">validated by <code>StudentForm</code> before any SQL is sent</span>
+    </div>
+    <div class="card-body">
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% if operation == 'UPDATE' %}
+          <div class="field">
+            <label>id <span class="type">INTEGER · PRIMARY KEY</span></label>
+            <input type="text" value="{{ student.id }}" disabled
+                   style="background:var(--surface-3); color:var(--ink-4)">
+            <div class="help">The primary key identifies the row and cannot be edited.</div>
+          </div>
+        {% endif %}
+
+        {% if form.non_field_errors %}
+          <div class="errors" style="margin-bottom:16px">{{ form.non_field_errors|striptags }}</div>
+        {% endif %}
+
+        {% for field in form %}
+          <div class="field">
+            <label for="{{ field.id_for_label }}">
+              {{ field.name }}
+              <span class="type">
+                {% if field.name == 'name' %}VARCHAR(100) · NOT NULL
+                {% elif field.name == 'email' %}VARCHAR(254) · UNIQUE
+                {% else %}VARCHAR(16) · 7–15 digits{% endif %}
+              </span>
+            </label>
+            {{ field }}
+            {% if field.help_text %}<div class="help">{{ field.help_text }}</div>{% endif %}
+            {% if field.errors %}
+              <div class="errors">✕ Rejected: {{ field.errors|striptags }}</div>
+            {% endif %}
+          </div>
+        {% endfor %}
+
+        <div class="actions">
+          <button class="btn {% if operation == 'CREATE' %}btn-c{% else %}btn-u{% endif %} btn-mono"
+                  type="submit">{{ submit_label }}</button>
+          <a class="btn btn-mono" href="{% url 'students:simulator' %}">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'lab/base.html' %}
+{% block title %}Exercises{% endblock %}
+
+{% block head %}
+  {% include 'lab/_pagehead.html' with kicker='Section 8 · Perform' title='Exercises' sub='Seven tasks to perform on the simulator. Each is checked automatically — as soon as the statement log shows you have carried it out, the task is marked complete. Nothing to submit.' %}
+{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <div class="card-top">
+      <span class="lbl">Progress</span>
+      <span class="meta">{{ completed }} of {{ total }} complete</span>
+    </div>
+    <div class="card-body">
+      <div class="track {% if all_done %}done{% endif %}" style="height:9px">
+        <i style="width:{% widthratio completed total 100 %}%"></i>
+      </div>
+      <p style="margin:14px 0 0; font-size:14px;
+                color:{% if all_done %}var(--create){% else %}var(--ink-3){% endif %}">
+        {% if all_done %}
+          <strong>All exercises complete.</strong> Continue to the
+          <a href="{% url 'lab:posttest' %}">Posttest</a>.
+        {% else %}
+          Perform the remaining tasks in the
+          <a href="{% url 'students:simulator' %}">Simulation</a> — forms or terminal, either
+          counts. This page updates each time you return to it.
+        {% endif %}
+      </p>
+    </div>
+  </div>
+
+  {% for exercise, done in results %}
+    <div class="card" {% if done %}style="border-color:var(--create-edge)"{% endif %}>
+      <div class="card-top" {% if done %}style="background:var(--create-wash)"{% endif %}>
+        <span class="op op-{{ exercise.operation }}">{{ exercise.operation }}</span>
+        <span class="lbl">Exercise {{ exercise.number }}</span>
+        <span class="meta" {% if done %}style="color:var(--create); font-weight:650"{% endif %}>
+          {% if done %}✓ Complete{% else %}Not yet done{% endif %}
+        </span>
+      </div>
+      <div class="card-body">
+        <h4 style="margin:0 0 9px; font-size:16px; font-weight:620; letter-spacing:-.018em">
+          {{ exercise.title }}
+        </h4>
+        <p style="margin:0 0 13px; color:var(--ink-2)">{{ exercise.instruction|safe }}</p>
+        <div class="callout" style="margin:0">
+          <svg class="ic"><use href="#i-info"></use></svg>
+          <div><b>What to observe:</b> {{ exercise.expected|safe }}</div>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+
+  <div class="actions">
+    <a class="btn btn-primary" href="{% url 'students:simulator' %}">
+      Open the Simulation <svg><use href="#i-arrow"></use></svg>
+    </a>
+    <a class="btn" href="{% url 'students:terminal' %}">Use the terminal</a>
+  </div>
+{% endblock %}

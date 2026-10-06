@@ -1,0 +1,36 @@
+{% extends 'lab/base.html' %}
+{% block title %}DELETE row {{ student.id }}{% endblock %}
+
+{% block head %}
+  {% include 'lab/_pagehead.html' with kicker='DELETE' title='Remove this row?' sub='A DELETE is not reversible — the row is removed from the table and its identifier is never issued again.' %}
+{% endblock %}
+
+{% block content %}
+  {% include 'students/_opspec.html' %}
+
+  <div class="card flush">
+    <div class="card-top"><span class="lbl">Row to be removed</span></div>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>id</th><th>name</th><th>email</th><th>phone</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="pk">{{ student.id }}</td>
+            <td style="color:var(--ink); font-weight:500">{{ student.name }}</td>
+            <td class="mono" style="font-size:13px">{{ student.email }}</td>
+            <td class="mono" style="font-size:13px">{{ student.phone }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div class="actions" style="margin:0">
+          <button class="btn btn-d btn-mono" type="submit">Run DELETE</button>
+          <a class="btn btn-mono" href="{% url 'students:simulator' %}">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

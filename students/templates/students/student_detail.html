@@ -1,0 +1,44 @@
+{% extends 'lab/base.html' %}
+{% block title %}Row {{ student.id }}{% endblock %}
+
+{% block head %}
+  {% include 'lab/_pagehead.html' with kicker='READ' title=student.name sub='A single row retrieved by primary key. Reading does not modify the table.' %}
+{% endblock %}
+
+{% block content %}
+  {% include 'students/_opspec.html' with operation='READ' http=http %}
+
+  <div class="card flush">
+    <div class="card-top"><span class="lbl">Result set — 1 row</span></div>
+    <div class="tbl">
+      <table>
+        <thead>
+          <tr>
+            <th>id <small>INTEGER · PK</small></th>
+            <th>name <small>VARCHAR(100)</small></th>
+            <th>email <small>VARCHAR(254) · UNIQUE</small></th>
+            <th>phone <small>VARCHAR(16)</small></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="pk">{{ student.id }}</td>
+            <td style="color:var(--ink); font-weight:500">{{ student.name }}</td>
+            <td class="mono" style="font-size:13px">{{ student.email }}</td>
+            <td class="mono" style="font-size:13px">{{ student.phone }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card-body">
+      <p class="help" style="margin:0 0 16px">
+        Row inserted {{ student.created_at }} · last updated {{ student.updated_at }}
+      </p>
+      <div class="actions" style="margin:0">
+        <a class="btn btn-u btn-mono" href="{% url 'students:update' student.pk %}">UPDATE this row</a>
+        <a class="btn btn-d btn-mono" href="{% url 'students:delete' student.pk %}">DELETE this row</a>
+        <a class="btn btn-mono" href="{% url 'students:simulator' %}">← Back</a>
+      </div>
+    </div>
+  </div>
+{% endblock %}

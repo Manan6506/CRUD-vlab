@@ -1,0 +1,21 @@
+{% extends 'lab/base.html' %}
+{% block title %}Posttest{% endblock %}
+
+{% block head %}
+  {% include 'lab/_pagehead.html' with kicker='Section 9 · Perform' title='Posttest' sub='Five questions about what you observed while performing the experiment. Compare your score with your pretest score to see what the simulation taught you.' %}
+{% endblock %}
+
+{% block content %}
+  {% if not attempt %}
+    <div class="callout">
+      <svg class="ic"><use href="#i-info"></use></svg>
+      <div>
+        <b>Complete the Simulation first.</b> These questions ask about behaviour you need to have
+        observed — such as which id a new row receives after a delete. Work through the
+        <a href="{% url 'lab:exercises' %}">Exercises</a> before answering.
+      </div>
+    </div>
+  {% endif %}
+
+  {% include 'lab/_quiz.html' %}
+{% endblock %}

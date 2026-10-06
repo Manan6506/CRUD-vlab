@@ -1,0 +1,140 @@
+{% extends 'lab/base.html' %}
+{% block title %}Theory{% endblock %}
+
+{% block head %}
+  {% include 'lab/_pagehead.html' with kicker='Section 3 · Understand' title='Theory' sub='The four operations, the table they act on, and the path a single operation takes through a Django application.' %}
+{% endblock %}
+
+{% block content %}
+  <h2 class="rule">The four operations</h2>
+  <div class="card flush">
+    <div class="tbl">
+      <table>
+        <thead>
+          <tr><th>Operation</th><th>SQL</th><th>HTTP</th><th>Django ORM</th><th>Meaning</th></tr>
+        </thead>
+        <tbody>
+          {% for row in mapping %}
+            <tr>
+              <td><span class="op op-{{ row.crud }}">{{ row.crud }}</span></td>
+              <td class="mono"><strong>{{ row.sql }}</strong></td>
+              <td class="mono" style="color:var(--ink-3)">{{ row.http }}</td>
+              <td class="mono" style="color:var(--ink-3); font-size:13px">{{ row.orm }}</td>
+              <td style="color:var(--ink-3)">{{ row.meaning }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="callout">
+    <svg class="ic"><use href="#i-info"></use></svg>
+    <div>
+      <b>On the HTTP column.</b> <code>PUT</code> and <code>DELETE</code> are the REST convention,
+      and this experiment's <a href="/api/students/">REST API</a> uses them. An HTML
+      <code>&lt;form&gt;</code>, however, can only issue <code>GET</code> and <code>POST</code>,
+      so the simulator sends updates and deletes as <code>POST</code> to a distinct URL. The
+      database operation is identical; only the transport differs.
+    </div>
+  </div>
+
+  <h2 class="rule">The table under test</h2>
+  <div class="card flush">
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Description</th></tr></thead>
+        <tbody>
+          {% for column, type, constraint, description in schema %}
+            <tr>
+              <td class="mono"><strong>{{ column }}</strong></td>
+              <td class="mono" style="color:var(--ink-3); font-size:13px">{{ type }}</td>
+              <td class="mono" style="color:var(--ink-3); font-size:13px">{{ constraint }}</td>
+              <td style="color:var(--ink-3)">{{ description }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="code" style="margin-bottom:16px">
+    <div class="cap">Schema (DDL)</div>
+    <pre>CREATE TABLE students (
+    id     INTEGER      PRIMARY KEY AUTOINCREMENT,
+    name   VARCHAR(100) NOT NULL,
+    email  VARCHAR(254) NOT NULL UNIQUE,
+    phone  VARCHAR(16)  NOT NULL
+);</pre>
+  </div>
+
+  <h3>Keys and constraints</h3>
+  <div class="prose">
+    <p>
+      The <strong>primary key</strong> <code>id</code> uniquely identifies a row. Two properties
+      follow from that, and you will verify both in the Exercises:
+    </p>
+    <ul>
+      <li>You never supply it. The database generates the next value on insert.</li>
+      <li>It is never reused. Delete row 5 and the next insert becomes row 6 — so a reference to
+        row 5 held elsewhere can never silently point at a different student.</li>
+    </ul>
+    <p>
+      The <strong>UNIQUE</strong> constraint on <code>email</code> is a different kind of rule: it
+      does not identify rows, it forbids duplicates. Try to insert a second student with an
+      existing email and the database refuses the statement outright.
+    </p>
+  </div>
+
+  <h2 class="rule">How one operation travels through Django</h2>
+  <div class="card">
+    <div class="card-top">
+      <span class="lbl">Request path</span>
+      <span class="meta">form submission → stored row</span>
+    </div>
+    <div class="card-body">
+      <ol class="flow-diagram">
+        {% for stage, description in flow %}
+          <li>
+            <span class="stage">{{ stage }}</span>
+            <div><p>{{ description|safe }}</p></div>
+          </li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+
+  <h3>Two layers of checking</h3>
+  <div class="prose">
+    <p>Steps 4 and 6 both reject bad data, but they are not the same thing:</p>
+    <ul>
+      <li><strong>Form validation</strong> runs in the application, before any SQL is sent. It
+        produces friendly, per-field messages — "Phone number must be 7 to 15 digits".</li>
+      <li><strong>Database constraints</strong> run inside the database and apply to
+        <em>every</em> write, including ones from the REST API, the admin or a SQL console. They
+        are what actually guarantees the data stays correct.</li>
+    </ul>
+    <p>A well-built application has both. The form exists for the user's benefit; the constraint
+      exists for the data's.</p>
+  </div>
+
+  <h2 class="rule">Why values are not pasted into the SQL</h2>
+  <div class="prose">
+    <p>
+      Throughout this lab the SQL is displayed with your values written inline, so it reads
+      naturally. A real application must never build a statement that way — a value containing a
+      quote character would change the meaning of the statement, which is the basis of an
+      <strong>SQL injection</strong> attack. The ORM sends the statement and the values
+      separately:
+    </p>
+  </div>
+  <div class="code">
+    <div class="cap">What is actually sent to the database</div>
+    <pre>INSERT INTO students (name, email, phone) VALUES (?, ?, ?);
+-- parameters: ['Asha Patil', 'asha.patil@example.com', '+919876543210']</pre>
+  </div>
+  <div class="prose" style="margin-top:15px">
+    <p>Because the value never becomes part of the statement text, there is nothing an attacker
+      can type that the database will execute.</p>
+  </div>
+{% endblock %}
