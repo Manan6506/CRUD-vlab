@@ -31,6 +31,8 @@
 
   <div class="snippets" id="hints"></div>
 
+  {% include 'students/_filetrace.html' %}
+
   <div class="callout" style="margin-top:22px">
     <svg class="ic"><use href="#i-info"></use></svg>
     <div>
@@ -144,6 +146,29 @@
     write(box);
   }
 
+  // Print the route the command took through the project's files. The file
+  // whose contents actually changed is marked.
+  function renderFiles(files) {
+    if (!files || !files.length) { return; }
+
+    var box = el('div', 't-files');
+    box.appendChild(el('div', '', 'files on the path:'));
+
+    var path = el('div', 'path');
+    files.forEach(function (entry, index) {
+      if (index) { path.appendChild(document.createTextNode('  →  ')); }
+      if (entry.changed) {
+        path.appendChild(el('b', '', entry.file + ' (changed)'));
+      } else if (entry.effect === 'reads') {
+        path.appendChild(document.createTextNode(entry.file + ' (read only)'));
+      } else {
+        path.appendChild(document.createTextNode(entry.file));
+      }
+    });
+    box.appendChild(path);
+    write(box);
+  }
+
   function banner() {
     line('Virtual Lab — simulated database terminal', 't-info');
     line('Table: students (id, name, email, phone).  No shell, no filesystem.', 't-dim');
@@ -198,6 +223,7 @@
     }
 
     renderEquivalent(data);
+    renderFiles(data.files);
     line('');
     updateRowCount(data.row_count);
   }

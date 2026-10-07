@@ -1,0 +1,55 @@
+{% comment %}
+  The route an operation takes through the project's files.
+
+  Included with a `trace` (a list of students.trace.Step) and a `trace_title`:
+      {% include 'students/_filetrace.html' with trace=trace trace_title='…' %}
+{% endcomment %}
+<div class="card">
+  <div class="card-top">
+    <span class="lbl">File trace</span>
+    <span class="meta">{{ trace_title }}</span>
+  </div>
+  <div class="card-body">
+    <p class="help" style="margin:0 0 18px">
+      The route this operation takes through the project. Each entry is a real file you can
+      open — the path runs top to bottom, and only the file marked
+      <strong style="color:var(--delete)">changed</strong> has its contents modified.
+    </p>
+
+    <ol class="trace">
+      {% for step in trace %}
+        <li class="trace-step {% if step.changed %}is-write{% endif %}">
+          <span class="trace-dot"></span>
+          <div class="trace-body">
+            <div class="trace-head">
+              <code class="trace-file">{{ step.file }}</code>
+              <span class="trace-role">{{ step.role }}</span>
+              {% if step.changed %}
+                <span class="trace-tag write">changed</span>
+              {% elif step.effect == 'reads' %}
+                <span class="trace-tag read">read only</span>
+              {% else %}
+                <span class="trace-tag">{{ step.effect }}</span>
+              {% endif %}
+            </div>
+            <code class="trace-symbol">{{ step.symbol }}</code>
+            <p>{{ step.detail }}</p>
+            {% if step.handoff %}
+              <p class="trace-handoff">↓ {{ step.handoff }}</p>
+            {% endif %}
+          </div>
+        </li>
+      {% endfor %}
+    </ol>
+
+    <div class="callout" style="margin:20px 0 0">
+      <svg class="ic"><use href="#i-info"></use></svg>
+      <div>
+        <b>No source file is modified.</b> Running an operation does not edit
+        <code>views.py</code>, <code>models.py</code> or any template — those files are
+        <em>executed</em>, in the order above. The only thing that changes is
+        <code>db.sqlite3</code>, which holds the data.
+      </div>
+    </div>
+  </div>
+</div>

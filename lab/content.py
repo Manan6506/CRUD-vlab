@@ -54,19 +54,32 @@ SCHEMA = [
      '7 to 15 digits, with an optional leading "+".'),
 ]
 
-#: The request/response path a single operation takes through Django.
+#: The request/response path a single operation takes through Django, with the
+#: file that handles each stage. The Simulation shows the same path per
+#: operation, generated from `students/trace.py`.
 REQUEST_FLOW = [
-    ('Browser', 'The student submits the HTML form, producing an HTTP request.'),
-    ('URLconf', 'Django matches the path against the patterns in <code>urls.py</code> '
-                'and selects a view.'),
-    ('View', 'The view builds a <code>StudentForm</code> from the submitted data.'),
-    ('Form', 'Validation runs: field validators, then <code>clean_&lt;field&gt;()</code>, '
-             'then <code>clean()</code>.'),
-    ('Model / ORM', 'If valid, <code>form.save()</code> asks the ORM to issue the SQL '
-                    'statement.'),
-    ('Database', 'The statement runs. Constraints such as UNIQUE may still refuse it.'),
-    ('Template', 'The view renders a template with the result, which is returned to the '
-                 'browser.'),
+    ('Browser', '',
+     'The student submits the HTML form, producing an HTTP request.'),
+    ('URLconf', 'studentproject/urls.py',
+     'Django matches the start of the path and <code>include()</code> hands the rest '
+     'to the app that owns it.'),
+    ('App URLs', 'students/urls.py',
+     'The remaining path is matched against the app\'s patterns; the first match names '
+     'the view to call.'),
+    ('View', 'students/views.py',
+     'The view builds a <code>StudentForm</code> from the submitted data.'),
+    ('Form', 'students/forms.py',
+     'Validation runs: field validators, then <code>clean_&lt;field&gt;()</code>, then '
+     '<code>clean()</code>.'),
+    ('Validators', 'students/validators.py',
+     'The rules attached to the model fields run as part of that validation.'),
+    ('Model / ORM', 'students/models.py',
+     'If valid, <code>form.save()</code> asks the ORM to issue the SQL statement.'),
+    ('Database', 'db.sqlite3',
+     'The statement runs. Constraints such as UNIQUE may still refuse it. '
+     '<strong>This is the only file whose contents change.</strong>'),
+    ('Template', 'students/templates/students/',
+     'The view renders a template with the result, which is returned to the browser.'),
 ]
 
 # ---------------------------------------------------------------------------

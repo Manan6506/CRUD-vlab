@@ -14,7 +14,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from . import terminal
+from . import terminal, trace
 from .forms import StudentForm
 from .models import OperationLog, Student
 from .sample_data import reset_experiment
@@ -95,6 +95,8 @@ def simulator(request):
         'ran_select': 'q' in request.GET,
         'log': OperationLog.objects.all()[:8],
         'log_total': OperationLog.objects.count(),
+        'trace': trace.for_read(single=False),
+        'trace_title': 'SELECT · what a read touches',
     })
 
 
@@ -110,6 +112,8 @@ def student_detail(request, pk):
     return render(request, 'students/student_detail.html', {
         'student': student, 'sql': sql, 'orm': orm,
         'http': f'GET /simulation/{pk}/',
+        'trace': trace.for_read(single=True),
+        'trace_title': f'SELECT … WHERE id = {pk}',
     })
 
 
@@ -170,6 +174,8 @@ def student_create(request):
                "VALUES ('<name>', '<email>', '<phone>');",
         'orm': "Student.objects.create(name='<name>', email='<email>', phone='<phone>')",
         'http': 'POST /simulation/add/',
+        'trace': trace.for_create(),
+        'trace_title': 'INSERT · what submitting this form touches',
     })
 
 
@@ -232,6 +238,8 @@ def student_update(request, pk):
                f'WHERE id = {student.id};',
         'orm': f'obj = Student.objects.get(pk={student.id})\nobj.phone = ...\nobj.save()',
         'http': f'POST /simulation/{student.id}/edit/',
+        'trace': trace.for_update(student.id),
+        'trace_title': f'UPDATE · what saving row {student.id} touches',
     })
 
 
@@ -262,6 +270,8 @@ def student_delete(request, pk):
     return render(request, 'students/student_confirm_delete.html', {
         'student': student, 'sql': sql, 'orm': orm,
         'operation': 'DELETE', 'http': f'POST /simulation/{student.id}/delete/',
+        'trace': trace.for_delete(student.id),
+        'trace_title': f'DELETE · what removing row {student.id} touches',
     })
 
 
@@ -294,9 +304,12 @@ def _attempted_insert_sql(form):
 
 def terminal_console(request):
     """Render the terminal page. The console itself runs in the browser."""
+    mode = 'orm' if request.GET.get('mode') == 'orm' else terminal.engine.SQL
     return render(request, 'students/terminal.html', {
-        'mode': request.GET.get('mode', terminal.engine.SQL),
+        'mode': mode,
         'log_total': OperationLog.objects.count(),
+        'trace': trace.for_terminal(writes=True, mode=mode),
+        'trace_title': 'what a typed command touches',
     })
 
 
@@ -317,4 +330,16 @@ def terminal_run(request):
     result = terminal.execute(command, mode)
     data = result.as_dict()
     data['row_count'] = Student.objects.count()
+
+    # The files this command passed through, so the console can print the route.
+    # The lab's own statement-log write is left out: including it would label
+    # the database 'changed' even for a SELECT, which is the opposite of the
+    # point. The full panel below the console still shows it.
+    writes = bool(result.tag and not result.failed
+                  and result.operation != OperationLog.READ)
+    steps = trace.for_terminal(writes=writes, mode=mode)
+    data['files'] = [] if result.failed else [
+        {'file': step.file, 'effect': step.effect, 'changed': step.changed}
+        for step in steps if step.role != 'Statement log'
+    ]
     return JsonResponse(data)

@@ -694,3 +694,74 @@ footer.site a:hover { color: var(--brand); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
+
+/* ==========================================================================
+   File trace — the route an operation takes through the project's files
+   ========================================================================== */
+ol.trace { margin: 0; padding: 0; list-style: none; }
+
+.trace-step { position: relative; padding: 0 0 20px 30px; }
+.trace-step:last-child { padding-bottom: 0; }
+
+/* the connecting line */
+.trace-step::before {
+  content: ''; position: absolute; left: 6px; top: 16px; bottom: -2px;
+  width: 1px; background: var(--edge);
+}
+.trace-step:last-child::before { display: none; }
+
+.trace-dot {
+  position: absolute; left: 0; top: 7px; width: 13px; height: 13px;
+  border-radius: 50%; background: var(--surface);
+  border: 2px solid var(--edge); z-index: 1;
+}
+.trace-step.is-write .trace-dot {
+  border-color: var(--delete);
+  background: var(--delete-wash);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--delete) 12%, transparent);
+}
+
+.trace-head {
+  display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin-bottom: 6px;
+}
+.trace-file {
+  background: var(--surface-3); color: var(--ink);
+  font: 600 12.5px/1.5 var(--mono); padding: 3px 9px; border-radius: 6px;
+}
+.trace-step.is-write .trace-file {
+  background: var(--delete-wash); color: var(--delete);
+  border: 1px solid var(--delete-edge);
+}
+.trace-role {
+  font: 600 10px/1 var(--mono); letter-spacing: .11em; text-transform: uppercase;
+  color: var(--ink-4);
+}
+.trace-tag {
+  margin-left: auto; font: 600 9.5px/1 var(--mono); letter-spacing: .1em;
+  text-transform: uppercase; padding: 4px 8px; border-radius: 99px;
+  background: var(--surface-3); color: var(--ink-4);
+}
+.trace-tag.write { background: var(--delete-wash); color: var(--delete); }
+.trace-tag.read { background: var(--read-wash); color: var(--read); }
+
+.trace-symbol {
+  display: block; background: none; padding: 0; color: var(--brand);
+  font: 500 12.5px/1.6 var(--mono); margin-bottom: 5px; word-break: break-word;
+}
+.trace-body p { margin: 0; font-size: 13.5px; color: var(--ink-3); line-height: 1.6; }
+.trace-handoff {
+  margin-top: 7px !important; font: 500 12px/1.5 var(--mono) !important;
+  color: var(--ink-4) !important;
+}
+
+/* compact variant printed inside the terminal */
+.t-files { margin: 6px 0 10px; padding-left: 13px; border-left: 2px solid #2a3245; }
+.t-files div { color: #78839e; font-size: 11.5px; letter-spacing: .02em; margin-bottom: 3px; }
+.t-files .path { color: #93a6c6; font-size: 12px; line-height: 1.75; }
+.t-files .path b { color: #e9a9a3; font-weight: 600; }
+
+.flow-file {
+  display: inline-block; margin-bottom: 6px;
+  background: var(--surface-3); color: var(--ink-2);
+  font: 600 11.5px/1.5 var(--mono); padding: 3px 8px; border-radius: 6px;
+}

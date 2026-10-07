@@ -28,8 +28,9 @@ This table is the quickest route into the code.
 | **Template rendering** | [lab/templates/lab/base.html](lab/templates/lab/base.html) | Template inheritance (`{% extends %}` / `{% block %}`), partials via `{% include %}` ([`_quiz.html`](lab/templates/lab/_quiz.html), [`_opspec.html`](students/templates/students/_opspec.html)), `{% url %}` instead of hard-coded paths, `{% static %}` for CSS |
 | **Forms with custom field validation** | [students/forms.py](students/forms.py), [lab/forms.py](lab/forms.py), [students/validators.py](students/validators.py) | All three validation stages: field validators, `clean_<field>()` per field, and a form-wide `clean()` comparing two fields. `QuizForm` additionally builds its fields **dynamically** from the database |
 | **Displaying data on templates** | [students/templates/students/simulator.html](students/templates/students/simulator.html) | Looping a queryset into a table, `{% if %}` / `{% empty %}` branches, filters (`date`, `pluralize`, `widthratio`), and rendering model properties |
-| **Unit testing** | [students/tests.py](students/tests.py), [students/test_terminal.py](students/test_terminal.py), [lab/tests.py](lab/tests.py) | 132 tests across models, validators, forms, views, navigation, the API, the terminal parsers and the exercise checker |
+| **Unit testing** | [students/tests.py](students/tests.py), [students/test_terminal.py](students/test_terminal.py), [lab/tests.py](lab/tests.py) | 157 tests across models, validators, forms, views, navigation, the API, the terminal parsers and the exercise checker |
 | **Simulated terminal** | [students/terminal/](students/terminal/) | A command console with two modes. Input is **parsed, never evaluated** — see section 3 below |
+| **File trace** | [students/trace.py](students/trace.py) | Every operation shows the route it takes through the project's files, and which single file actually changes — see section 4 below |
 | **REST API + serializers** | [students/serializers.py](students/serializers.py), [students/api.py](students/api.py) | A `ModelSerializer` with `validate_<field>()` hooks and `read_only_fields`, exposed through a `ModelViewSet`. Browsable at `/api/students/` |
 | **Django admin** | [students/admin.py](students/admin.py), [lab/admin.py](lab/admin.py) | `list_display`, `list_filter`, `search_fields`, `fieldsets`, `readonly_fields`, `date_hierarchy`, a **custom `SimpleListFilter`**, **inlines** for related models, `@admin.display` computed columns with coloured HTML, and a custom bulk **action** |
 | **Models & migrations** | [students/models.py](students/models.py), [lab/models.py](lab/models.py), [lab/migrations/0002_seed_questions.py](lab/migrations/0002_seed_questions.py) | Field types, `UniqueConstraint`, related names, model properties, and a **data migration** that seeds the quiz questions so no manual setup is needed |
@@ -116,7 +117,50 @@ counts towards the Exercises** exactly as work done through the forms does.
 
 ---
 
-## 4. How the auto-checked exercises work
+## 4. The file trace
+
+Every page of the Simulation shows a **File trace**: the route that operation takes through the
+project, file by file. For an INSERT, for example:
+
+```
+studentproject/urls.py   routes   path('simulation/', include('students.urls'))
+students/urls.py         routes   path('add/', views.student_create, name='create')
+students/views.py        runs     student_create()
+students/forms.py        runs     StudentForm.clean_name() · clean_email() · clean_phone() · clean()
+students/validators.py   runs     validate_phone() · validate_not_numeric()
+students/models.py       runs     Student
+db.sqlite3               CHANGED  table: students
+db.sqlite3               CHANGED  table: students_operationlog
+students/templates/students/simulator.html   renders
+```
+
+Each step says what that file does and how control reaches the next one, so the hand-offs
+(`include()`, the view named in a URL pattern, `form.save()`) are visible rather than implied.
+
+The trace makes one point deliberately: **no source file is modified.** `views.py`, `models.py`
+and the templates are *executed*, in order; the only file whose contents change is
+`db.sqlite3`. A read is labelled `read only` and a write `changed`, so the difference is visible
+at a glance.
+
+The terminal prints the same route compactly after each command:
+
+```
+files on the path:
+studentproject/urls.py → students/urls.py → students/views.py →
+students/terminal/parsers.py → students/terminal/engine.py →
+students/models.py → db.sqlite3 (changed) → students/templates/students/terminal.html
+```
+
+### Keeping it honest
+
+The traces are written by hand in [students/trace.py](students/trace.py), so the risk is that
+they drift from the code. [students/test_trace.py](students/test_trace.py) prevents that — it
+asserts that every file named exists, that every symbol named actually appears in that file,
+and that the only file ever marked as changed is the database. Rename a view and the test fails.
+
+---
+
+## 5. How the auto-checked exercises work
 
 This is the one non-obvious mechanism in the project, so it is worth explaining:
 
@@ -132,7 +176,7 @@ Rejected operations are logged too (with `status=REJECTED`), which is what lets 
 
 ---
 
-## 5. Project layout
+## 6. Project layout
 
 ```
 studentproject/          project configuration
@@ -153,6 +197,8 @@ students/                the table under test, and the simulator
     seedlab.py             `python manage.py seedlab` — load the sample rows
   tests.py                 CRUD, form, model and API tests
   test_terminal.py         parser, engine, safety and endpoint tests
+  trace.py                 the file route each operation takes
+  test_trace.py            keeps the trace in step with the code
   terminal/                the simulated terminal
     parsers.py               SQL and ORM text -> Command (no eval)
     engine.py                executes a Command, renders both forms
@@ -178,7 +224,7 @@ lab/                     the virtual lab itself
 
 ---
 
-## 6. Running it
+## 7. Running it
 
 ```bash
 python manage.py runserver
@@ -213,13 +259,13 @@ The **Reset** button on the Simulation page restores the table to its original f
 
 ---
 
-## 7. Tests
+## 8. Tests
 
 ```bash
 python manage.py test
 ```
 
-132 tests. To run one app or one class:
+157 tests. To run one app or one class:
 
 ```bash
 python manage.py test lab.tests.FeedbackFormTests
