@@ -1,30 +1,32 @@
 {% load static %}<!DOCTYPE html>
 {% comment %}
-  The shell every page of the experiment renders inside.
+  The shell every page of the experiment renders inside, following the
+  Virtual Labs house style: white masthead with an orange rule, a breadcrumb,
+  a plain text sidebar, and a dark footer.
 
   Child templates override:
     {% block title %}      the browser tab title
-    {% block head %}       the page heading area (kicker + title + subtitle)
+    {% block head %}       the page heading area
     {% block content %}    the body of the section
     {% block scripts %}    any page-specific JavaScript
 
-  The rail, pager and progress meter come from the
-  `lab.context_processors.lab_nav` context processor, so no view builds them.
+  The rail, breadcrumb, footer and progress meter all come from the
+  `lab.context_processors.lab_nav` context processor; the wording is
+  configured in `lab/content.py`.
 {% endcomment %}
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <title>{% block title %}Virtual Lab{% endblock %} · CRUD Operations</title>
+  <title>{% block title %}Virtual Lab{% endblock %} | CRUD Operations on a Relational Database</title>
 
   {# Apply the saved theme before first paint so the page never flashes. #}
   <script>
     (function () {
       try {
-        var saved = localStorage.getItem('lab-theme');
-        var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        document.documentElement.setAttribute('data-theme', saved || (dark ? 'dark' : 'light'));
+        document.documentElement.setAttribute(
+          'data-theme', localStorage.getItem('lab-theme') || 'light');
       } catch (e) {
         document.documentElement.setAttribute('data-theme', 'light');
       }
@@ -33,27 +35,37 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Raleway:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="{% static 'lab/css/lab.css' %}">
 </head>
 <body>
 {% include 'lab/_icons.html' %}
 
-<header class="topbar">
+<header class="masthead">
   <div class="in">
-    <a class="brand" href="{% url 'lab:aim' %}">
-      <span class="mark"><svg><use href="#i-db"></use></svg></span>
-      <span class="txt">
+    <a class="inst" href="{% url 'lab:aim' %}">
+      <span class="crest"><svg><use href="#i-crest"></use></svg></span>
+      <span class="lines">
+        <b>{{ institution_name }}</b>
+        <span>{{ institution_line_1 }}</span>
+        <em>{{ institution_line_2 }}</em>
+      </span>
+    </a>
+
+    <a class="vl-mark" href="{% url 'lab:aim' %}">
+      <span class="glyph"><svg><use href="#i-db"></use></svg></span>
+      <span class="words">
         <b>Virtual Labs</b>
         <span>Database Systems</span>
       </span>
     </a>
 
-    <div class="tools">
-      <span class="chip"><i class="dot"></i>students · <b>{{ row_count }}</b> row{{ row_count|pluralize }}</span>
-      <a class="tlink" href="{% url 'students:terminal' %}">Terminal</a>
-      <a class="tlink" href="/api/students/">API</a>
-      <a class="tlink" href="/admin/">Admin</a>
+    <div class="right">
+      <span class="stars" title="Experiment rating" aria-label="Rated 4 out of 5">
+        ★★★★<span class="off">★</span>
+      </span>
+      <a class="pill-btn" href="{% url 'lab:feedback' %}">Rate Me</a>
+      <a class="pill-btn ghost" href="{% url 'lab:feedback' %}">Report a Bug</a>
       <button class="icon-btn" id="theme-toggle" type="button"
               title="Switch between light and dark" aria-label="Switch between light and dark">
         <svg class="sun"><use href="#i-sun"></use></svg>
@@ -62,6 +74,18 @@
     </div>
   </div>
 </header>
+
+<nav class="crumb" aria-label="Breadcrumb">
+  <div class="in">
+    {% for entry in breadcrumb %}
+      {% if not forloop.first %}<span class="sep">›</span>{% endif %}
+      <a href="{{ entry.url }}">{{ entry.label }}</a>
+    {% endfor %}
+    {% if nav_active_label %}
+      <span class="sep">›</span><a href="#">{{ nav_active_label }}</a>
+    {% endif %}
+  </div>
+</nav>
 
 <div class="layout">
   <nav class="rail" aria-label="Experiment sections">
@@ -74,11 +98,8 @@
         <i style="width:{{ done_percent }}%"></i>
       </div>
       <p>
-        {% if done_count == done_total %}
-          All tasks complete.
-        {% else %}
-          Progress updates as you use the simulator.
-        {% endif %}
+        {% if done_count == done_total %}All tasks complete.
+        {% else %}Updates as you use the simulator.{% endif %}
       </p>
     </div>
 
@@ -87,10 +108,7 @@
         <h4>{{ group.name }}</h4>
         {% for entry in group.items %}
           <a href="{{ entry.url }}" class="{% if entry.active %}on{% endif %}"
-             {% if entry.active %}aria-current="page"{% endif %}>
-            <span class="ic"><svg><use href="#i-{{ entry.icon }}"></use></svg></span>
-            {{ entry.label }}
-          </a>
+             {% if entry.active %}aria-current="page"{% endif %}>{{ entry.label }}</a>
         {% endfor %}
       </div>
     {% endfor %}
@@ -102,6 +120,9 @@
         {% for message in messages %}<li class="{{ message.tags }}">{{ message }}</li>{% endfor %}
       </ul>
     {% endif %}
+
+    {# The experiment title heads every page; the section name follows below. #}
+    <h1 class="page-title">{{ experiment_title }}</h1>
 
     {% block head %}{% endblock %}
     {% block content %}{% endblock %}
@@ -121,13 +142,18 @@
 
 <footer class="site">
   <div class="in">
-    <span>Database Systems Virtual Lab · Experiment 1 · built with Django</span>
-    <span>
-      <a href="{% url 'lab:references' %}">References</a> ·
-      <a href="{% url 'lab:contributors' %}">Contributors</a> ·
-      <a href="{% url 'lab:feedback' %}">Feedback</a>
-    </span>
+    {% for column in footer_columns %}
+      <div>
+        <h5>{{ column.heading }}</h5>
+        <ul>
+          {% for link in column.links %}
+            <li><a href="{{ link.url }}">{{ link.label }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endfor %}
   </div>
+  <div class="note">{{ footer_note }}</div>
 </footer>
 
 <script>

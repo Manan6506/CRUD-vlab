@@ -1,9 +1,10 @@
 {% comment %}
-  Standard page heading. Included by each section with:
-      {% include 'lab/_pagehead.html' with kicker='…' title='…' sub='…' %}
+  The section heading, in the house style: an underlined h3 beneath the
+  centred experiment title that base.html renders.
+
+      {% include 'lab/_pagehead.html' with title='Theory' sub='…' %}
 {% endcomment %}
 <div class="page-head">
-  <span class="kicker">{{ kicker }}</span>
-  <h1 class="page-title">{{ title }}</h1>
+  <h3 class="section">{{ title }}</h3>
   {% if sub %}<p class="sub">{{ sub|safe }}</p>{% endif %}
 </div>

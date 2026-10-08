@@ -2,11 +2,11 @@
 {% block title %}Theory{% endblock %}
 
 {% block head %}
-  {% include 'lab/_pagehead.html' with kicker='Section 3 · Understand' title='Theory' sub='The four operations, the table they act on, and the path a single operation takes through a Django application.' %}
+  {% include 'lab/_pagehead.html' with title='Theory' sub='The four operations, the table they act on, and the path a single operation takes through a Django application.' %}
 {% endblock %}
 
 {% block content %}
-  <h2 class="rule">The four operations</h2>
+  <h3 class="section">The four operations</h3>
   <div class="card flush">
     <div class="tbl">
       <table>
@@ -39,7 +39,7 @@
     </div>
   </div>
 
-  <h2 class="rule">The table under test</h2>
+  <h3 class="section">The table under test</h3>
   <div class="card flush">
     <div class="tbl">
       <table>
@@ -86,7 +86,7 @@
     </p>
   </div>
 
-  <h2 class="rule">How one operation travels through Django</h2>
+  <h3 class="section">How one operation travels through Django</h3>
   <div class="card">
     <div class="card-top">
       <span class="lbl">Request path</span>
@@ -121,7 +121,7 @@
       exists for the data's.</p>
   </div>
 
-  <h2 class="rule">Why values are not pasted into the SQL</h2>
+  <h3 class="section">Why values are not pasted into the SQL</h3>
   <div class="prose">
     <p>
       Throughout this lab the SQL is displayed with your values written inline, so it reads

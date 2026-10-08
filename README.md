@@ -39,20 +39,32 @@ This table is the quickest route into the code.
 
 ### Interface
 
-The experiment is laid out as a **navigation rail** grouping the twelve sections under
-*Understand*, *Perform* and *More*, with a live exercise-progress meter at the top. The home page
-carries a hero and a **clickable index** of all twelve sections, so there is no dead breadcrumb
-text anywhere — every navigational element goes somewhere.
+The interface follows the **Virtual Labs house style** used by vlabs.ac.in experiments:
 
-Typography is Inter (interface) and JetBrains Mono (code, identifiers, SQL), loaded from Google
-Fonts with system fallbacks.
+* a white masthead carrying the institution block and a *Virtual Labs* wordmark, closed by the
+  8px orange rule (`#ff6600`);
+* a breadcrumb trail, a plain bold text sidebar whose active entry turns orange, the experiment
+  title centred in blue (`#2c99ce`) on every page, and underlined section headings;
+* Open Sans and Raleway, justified body copy, bordered tables, pink inline code (`#e83e8c`),
+  learning objectives as `LO n` cards with a blue left border, and a dark footer.
+
+The masthead institution, the breadcrumb trail and the footer columns are **configured in
+[lab/content.py](lab/content.py)**, not hard-coded into the template — so they can be
+repointed without touching HTML. Each is resolved through Django's `reverse()` in
+[lab/context_processors.py](lab/context_processors.py), which is what keeps every breadcrumb
+entry a working link.
+
+> **Branding.** No third-party logo is reproduced. The institution crest and the *Virtual Labs*
+> wordmark are generic placeholders — replace `INSTITUTION_NAME` and the lines beneath it in
+> `lab/content.py` with your own. The footer deliberately does **not** reproduce the official
+> Virtual Labs portal links, because this is a course project rather than an official
+> Virtual Labs deployment.
 
 **Light and dark themes.** Every colour is a CSS custom property declared twice in
-[lab.css](lab/static/lab/css/lab.css) — once on `:root`, once under `[data-theme="dark"]` — so
-nothing below the palette blocks refers to a literal colour. The toggle in the top bar sets that
-attribute on `<html>` and stores the choice in `localStorage`; an inline script in `<head>`
-applies it before first paint so the page never flashes. The initial theme follows the operating
-system's `prefers-color-scheme` until the student picks one.
+[lab.css](lab/static/lab/css/lab.css) — once on `:root`, once under `[data-theme="dark"]`.
+Light is the default, since that is the house style; the toggle in the masthead stores the
+choice in `localStorage`, and an inline script in `<head>` applies it before first paint so the
+page never flashes.
 
 ---
 

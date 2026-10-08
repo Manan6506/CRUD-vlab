@@ -31,7 +31,7 @@ class SectionPageTests(TestCase):
 
     def test_home_page_is_the_aim(self):
         response = self.client.get('/')
-        self.assertContains(response, 'Learning outcomes')
+        self.assertContains(response, 'Learning Objectives')
         self.assertContains(response, 'Performing CRUD Operations')
 
     def test_home_page_links_to_every_section(self):
@@ -41,10 +41,35 @@ class SectionPageTests(TestCase):
             with self.subTest(section=entry['slug']):
                 self.assertContains(response, f'href="{entry["url"]}"')
 
-    def test_no_dead_breadcrumb_text(self):
-        """Regression: the old breadcrumb was unclickable placeholder text."""
+    def test_every_breadcrumb_entry_is_a_link(self):
+        """Regression: the breadcrumb used to be unclickable placeholder text.
+
+        It is back, because the Virtual Labs house style has one — but every
+        entry must resolve to a real URL, which is what was wrong before.
+        """
+        from . import content
         response = self.client.get(reverse('lab:theory'))
-        self.assertNotContains(response, 'Computer Engineering ')
+        self.assertTrue(response.context['breadcrumb'])
+        self.assertEqual(len(response.context['breadcrumb']), len(content.BREADCRUMB))
+        for entry in response.context['breadcrumb']:
+            with self.subTest(crumb=entry['label']):
+                self.assertTrue(entry['url'], f'{entry["label"]} has no URL')
+                self.assertContains(
+                    response, f'<a href="{entry["url"]}">{entry["label"]}</a>',
+                    html=False,
+                )
+
+    def test_footer_links_all_resolve(self):
+        response = self.client.get(reverse('lab:aim'))
+        for column in response.context['footer_columns']:
+            for link in column['links']:
+                with self.subTest(link=link['label']):
+                    self.assertTrue(link['url'])
+
+    def test_masthead_shows_the_configured_institution(self):
+        from . import content
+        response = self.client.get(reverse('lab:aim'))
+        self.assertContains(response, content.INSTITUTION_NAME)
 
     def test_theory_lists_all_four_operations(self):
         response = self.client.get(reverse('lab:theory'))

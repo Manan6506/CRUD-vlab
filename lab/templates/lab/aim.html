@@ -2,44 +2,49 @@
 {% block title %}Aim{% endblock %}
 
 {% block head %}
-  <section class="hero">
-    <span class="kicker">Database Systems · Experiment 1</span>
-    <h1>Performing CRUD Operations on a Relational Database</h1>
-    <p>
-      Create, Read, Update and Delete — the four operations every data-driven application is
-      built from. Perform each one on a live table and see the SQL statement and the Django ORM
-      call behind it.
-    </p>
-    <div class="flow">
-      <span>CREATE</span><i>→</i><span>READ</span><i>→</i><span>UPDATE</span><i>→</i><span>DELETE</span>
-    </div>
-  </section>
+  {% include 'lab/_pagehead.html' with title='Aim of the Experiment' %}
 {% endblock %}
 
 {% block content %}
-  <h2 class="rule">Aim</h2>
   <div class="prose">
-    <p style="font-size:17px; color:var(--ink-2)">
+    <p>
       To perform and observe the four fundamental persistent-storage operations on a relational
       database table, and to relate each operation to the SQL statement, the HTTP method and the
       Django ORM call that carries it out.
     </p>
   </div>
 
-  <h2 class="rule">Learning outcomes</h2>
+  <h3 class="section">Learning Objectives</h3>
   <div class="prose">
-    <p>After completing this experiment, you will be able to:</p>
-    <ul>
-      <li>Describe the four CRUD operations and name the SQL statement for each.</li>
-      <li>Explain how a primary key identifies a row, and why identifiers are never reused.</li>
-      <li>Demonstrate how a <code>UNIQUE</code> constraint causes the database to refuse a write.</li>
-      <li>Trace one operation through Django's URL → view → form → model → template path.</li>
-      <li>Distinguish validation performed by the application from constraints enforced by the database.</li>
-      <li>Carry out the same operation three ways: through a form, by typing SQL, and in the ORM.</li>
-    </ul>
+    <p>After completing this virtual lab experiment, students will be able to:</p>
   </div>
+  <ol class="objectives">
+    <li class="objective">
+      <p><b>Identify the four CRUD operations:</b> describe Create, Read, Update and Delete, and
+        name the SQL statement that carries out each one.</p>
+    </li>
+    <li class="objective">
+      <p><b>Explain the role of a primary key:</b> show how <code>id</code> identifies a row, why
+        the database rather than the client assigns it, and why a deleted identifier is never
+        reissued.</p>
+    </li>
+    <li class="objective">
+      <p><b>Demonstrate a constraint violation:</b> cause a <code>UNIQUE</code> constraint to
+        refuse a write, and distinguish that refusal from a validation error raised by the
+        application.</p>
+    </li>
+    <li class="objective">
+      <p><b>Trace a request through Django:</b> follow one operation through
+        <code>urls.py</code> → <code>views.py</code> → <code>forms.py</code> →
+        <code>models.py</code> → template, and identify which file actually changes.</p>
+    </li>
+    <li class="objective">
+      <p><b>Compare the three interfaces:</b> perform the same operation through an HTML form, by
+        typing SQL, and as a Django ORM expression, and relate the three to one another.</p>
+    </li>
+  </ol>
 
-  <h2 class="rule">The four operations</h2>
+  <h3 class="section">The four operations</h3>
   <div class="tiles">
     <div class="tile">
       <span class="op op-CREATE">CREATE</span>
@@ -63,7 +68,7 @@
     </div>
   </div>
 
-  <h2 class="rule">Sections of this experiment</h2>
+  <h3 class="section">Sections of this experiment</h3>
   <div class="index-grid">
     {% for entry in nav_sections %}
       <a class="index-card" href="{{ entry.url }}">

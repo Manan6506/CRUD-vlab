@@ -4,9 +4,21 @@ Registered in ``settings.TEMPLATES`` so the navigation rail, the pager and the
 progress meter are not rebuilt by hand in each view that renders them.
 """
 
+from django.urls import reverse
+
 from students.models import Student
 
-from . import exercises, navigation
+from . import content, exercises, navigation
+
+
+def _resolve(entry):
+    """Turn a configured link into {label, url}.
+
+    An entry gives either `url_name` (a named pattern, resolved here) or a
+    literal `url`. Resolving names means a changed path updates every link.
+    """
+    url = reverse(entry['url_name']) if 'url_name' in entry else entry['url']
+    return {'label': entry['label'], 'url': url}
 
 
 def _active_slug(request):
@@ -37,6 +49,17 @@ def lab_nav(request):
     done, total = exercises.progress()
 
     return {
+        'breadcrumb': [_resolve(entry) for entry in content.BREADCRUMB],
+        'footer_columns': [
+            {'heading': column['heading'],
+             'links': [_resolve(link) for link in column['links']]}
+            for column in content.FOOTER_COLUMNS
+        ],
+        'footer_note': content.FOOTER_NOTE,
+        'experiment_title': content.EXPERIMENT_TITLE,
+        'institution_name': content.INSTITUTION_NAME,
+        'institution_line_1': content.INSTITUTION_LINE_1,
+        'institution_line_2': content.INSTITUTION_LINE_2,
         'nav_groups': navigation.grouped(active),
         'nav_sections': navigation.build(active),
         'nav_previous': previous,

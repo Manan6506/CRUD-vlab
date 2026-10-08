@@ -2,7 +2,7 @@
 {% block title %}Row {{ student.id }}{% endblock %}
 
 {% block head %}
-  {% include 'lab/_pagehead.html' with kicker='READ' title=student.name sub='A single row retrieved by primary key. Reading does not modify the table.' %}
+  {% include 'lab/_pagehead.html' with title=student.name sub='A single row retrieved by primary key. Reading does not modify the table.' %}
 {% endblock %}
 
 {% block content %}

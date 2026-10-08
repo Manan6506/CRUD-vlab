@@ -2,11 +2,11 @@
 {% block title %}Introduction{% endblock %}
 
 {% block head %}
-  {% include 'lab/_pagehead.html' with kicker='Section 2 · Understand' title='Introduction' sub='Why every data-driven application reduces to four operations, and what you will build and observe here.' %}
+  {% include 'lab/_pagehead.html' with title='Introduction' sub='Why every data-driven application reduces to four operations, and what you will build and observe here.' %}
 {% endblock %}
 
 {% block content %}
-  <h2 class="rule">What is CRUD?</h2>
+  <h3 class="section">What is CRUD?</h3>
   <div class="prose">
     <p>
       Almost every application that stores information does only four things with it: it
@@ -23,7 +23,7 @@
     </p>
   </div>
 
-  <h2 class="rule">Why a relational table?</h2>
+  <h3 class="section">Why a relational table?</h3>
   <div class="prose">
     <p>
       A <em>relational</em> database stores data in tables of rows and columns. Each column has a
@@ -39,7 +39,7 @@
     </p>
   </div>
 
-  <h2 class="rule">What you will work with</h2>
+  <h3 class="section">What you will work with</h3>
   <div class="prose">
     <p>
       The experiment uses a single table, <code>students</code>, holding four columns: an

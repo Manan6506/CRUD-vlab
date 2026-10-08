@@ -8,6 +8,67 @@ the experiment in one Python file without touching HTML.
 >>> your team's real details before submitting.
 """
 
+
+# ---------------------------------------------------------------------------
+# Masthead, breadcrumb and footer  >>> EDIT ME <<<
+#
+# The interface follows the Virtual Labs house style. The institution shown in
+# the masthead and the breadcrumb trail are configured here rather than
+# hard-coded into the template, so they can be changed without touching HTML.
+# ---------------------------------------------------------------------------
+
+#: The experiment's own title, shown centred at the top of every page.
+EXPERIMENT_TITLE = 'Performing CRUD Operations on a Relational Database using Django'
+
+#: Shown at the left of the masthead. Replace with your institution's details.
+INSTITUTION_NAME = 'Your Institution'
+INSTITUTION_LINE_1 = 'Department of Computer Engineering'
+INSTITUTION_LINE_2 = '(replace in lab/content.py)'
+
+#: The breadcrumb trail. Every entry is a real link — `url` is either a plain
+#: path or the name of a URL pattern, resolved in lab/context_processors.py.
+BREADCRUMB = [
+    {'label': 'Computer Engineering', 'url_name': 'lab:aim'},
+    {'label': 'Database Systems Lab', 'url_name': 'lab:aim'},
+    {'label': 'Experiments', 'url_name': 'lab:aim'},
+]
+
+#: Footer columns. Links are the experiment's own — the official Virtual Labs
+#: portal links are deliberately not reproduced here, because this is a course
+#: project and not an official Virtual Labs deployment.
+FOOTER_COLUMNS = [
+    {
+        'heading': 'This Experiment',
+        'links': [
+            {'label': 'Aim', 'url_name': 'lab:aim'},
+            {'label': 'Theory', 'url_name': 'lab:theory'},
+            {'label': 'Simulation', 'url_name': 'students:simulator'},
+            {'label': 'References', 'url_name': 'lab:references'},
+        ],
+    },
+    {
+        'heading': 'Take Part',
+        'links': [
+            {'label': 'Pretest', 'url_name': 'lab:pretest'},
+            {'label': 'Exercises', 'url_name': 'lab:exercises'},
+            {'label': 'Posttest', 'url_name': 'lab:posttest'},
+            {'label': 'Feedback', 'url_name': 'lab:feedback'},
+        ],
+    },
+    {
+        'heading': 'Built With',
+        'links': [
+            {'label': 'Django', 'url': 'https://www.djangoproject.com/'},
+            {'label': 'Django REST Framework', 'url': 'https://www.django-rest-framework.org/'},
+            {'label': 'SQLite', 'url': 'https://www.sqlite.org/'},
+            {'label': 'REST API (this lab)', 'url': '/api/students/'},
+        ],
+    },
+]
+
+FOOTER_NOTE = ('Database Systems Virtual Lab · Experiment 1 · a course project, '
+               'not an official Virtual Labs deployment.')
+
 # ---------------------------------------------------------------------------
 # Theory
 # ---------------------------------------------------------------------------
