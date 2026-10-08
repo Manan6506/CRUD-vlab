@@ -20,10 +20,14 @@ the experiment in one Python file without touching HTML.
 #: The experiment's own title, shown centred at the top of every page.
 EXPERIMENT_TITLE = 'Performing CRUD Operations on a Relational Database using Django'
 
-#: Shown at the left of the masthead. Replace with your institution's details.
-INSTITUTION_NAME = 'Your Institution'
-INSTITUTION_LINE_1 = 'Department of Computer Engineering'
-INSTITUTION_LINE_2 = '(replace in lab/content.py)'
+#: Shown at the left of the masthead.
+#: These are plain text, set here rather than in the template. The institution's
+#: own logo file is deliberately not bundled — see the note in the README.
+INSTITUTION_NAME = 'Somaiya'
+INSTITUTION_SUBTITLE = 'Vidyavihar University'
+INSTITUTION_LINE_1 = 'K J Somaiya School of Engineering'
+INSTITUTION_LINE_2 = '(formerly K J Somaiya College of Engineering)'
+INSTITUTION_URL = 'https://kjsce.somaiya.edu/en'
 
 #: The breadcrumb trail. Every entry is a real link — `url` is either a plain
 #: path or the name of a URL pattern, resolved in lab/context_processors.py.

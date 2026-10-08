@@ -5,12 +5,12 @@
    masthead, a plain text sidebar, a centred blue experiment title and
    underlined section headings.
 
-   Every colour is a custom property declared twice — once on :root for the
-   light theme, once under [data-theme="dark"]. Light is the default and is
-   what matches the house style; the dark variant is a convenience.
+   Every colour is a custom property on :root, so the palette can be changed
+   from one block. The lab is light-only, matching the Virtual Labs house
+   style; there is no dark theme.
    ========================================================================== */
 
-/* --------------------------------- light ---------------------------------- */
+/* -------------------------------- palette --------------------------------- */
 :root {
   --page:        #ffffff;
   --panel:       #ffffff;
@@ -25,6 +25,7 @@
   --edge:        #dee2e6;
   --edge-2:      #e9ecef;
 
+  --vl-maroon:   #9c1b1f;   /* institution name                    */
   --vl-orange:   #ff6600;   /* masthead rule, active sidebar link */
   --vl-blue:     #2c99ce;   /* experiment title, badges            */
   --vl-link:     #337ab7;   /* breadcrumb and body links           */
@@ -65,55 +66,8 @@
   --mono:    SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
 
-/* ---------------------------------- dark ---------------------------------- */
-[data-theme="dark"] {
-  --page:        #15181c;
-  --panel:       #1b1f24;
-  --panel-2:     #21262c;
-  --panel-3:     #2a3038;
-
-  --ink:         #e6e9ed;
-  --ink-2:       #d2d7dd;
-  --ink-3:       #a3abb5;
-  --ink-4:       #79818b;
-
-  --edge:        #2e343c;
-  --edge-2:      #262c33;
-
-  --vl-orange:   #ff8534;
-  --vl-blue:     #5cb8e6;
-  --vl-link:     #6aa9dd;
-  --vl-side:     #9bb8d4;
-  --vl-accent:   #6d94ea;
-
-  --brand-wash:  #1d2a36;
-  --brand-ring:  rgba(106,169,221,.3);
-
-  --code-ink:    #ff86bd;
-  --code-bg:     rgba(255,255,255,.07);
-
-  --create:#5bc98a; --create-wash:#14281d; --create-edge:#255038;
-  --read:#78abf3;   --read-wash:#141f30;   --read-edge:#28426b;
-  --update:#e0b45f; --update-wash:#2a2213; --update-edge:#4f3d19;
-  --delete:#ef8e88; --delete-wash:#2c1719; --delete-edge:#55272b;
-
-  --block-bg:    #0f1216;
-  --block-ink:   #d8dde4;
-  --block-edge:  #242a31;
-  --block-cap:   #727a84;
-
-  --term-bg:     #111418;
-  --term-ink:    #cdd4dc;
-  --term-prompt: #5bc98a;
-  --term-dim:    #79818b;
-
-  --sh-1: 0 1px 2px rgba(0,0,0,.4);
-  --sh-2: 0 1px 4px rgba(0,0,0,.5);
-}
-
 *, *::before, *::after { box-sizing: border-box; }
 html { color-scheme: light; }
-[data-theme="dark"] { color-scheme: dark; }
 
 body {
   margin: 0; background: var(--page); color: var(--ink);
@@ -143,16 +97,20 @@ a:hover { color: var(--vl-link); text-decoration: underline; }
 .inst .crest {
   width: 46px; height: 46px; flex: none; border-radius: 50%;
   display: grid; place-items: center;
-  background: var(--panel-2); border: 2px solid var(--vl-orange); color: var(--vl-orange);
+  background: var(--panel-2); border: 2px solid var(--vl-maroon); color: var(--vl-maroon);
 }
 .inst .crest svg { width: 22px; height: 22px; }
 .inst .lines { line-height: 1.25; }
 .inst .lines b {
-  display: block; font: 700 19px/1.2 var(--display);
-  color: var(--vl-orange); letter-spacing: .01em; text-transform: uppercase;
+  display: block; font: 700 21px/1.1 var(--display);
+  color: var(--vl-maroon); letter-spacing: .04em; text-transform: uppercase;
 }
-.inst .lines span { display: block; font-size: 11.5px; color: var(--ink-3); }
-.inst .lines em { display: block; font-size: 10px; color: var(--ink-4); font-style: normal; }
+.inst .lines i {
+  display: block; font: 600 10.5px/1.3 var(--sans); font-style: normal;
+  color: var(--vl-maroon); letter-spacing: .06em; text-transform: uppercase;
+}
+.inst .lines span { display: block; font-size: 11.5px; color: var(--ink-2); margin-top: 2px; }
+.inst .lines em { display: block; font-size: 9.5px; color: var(--ink-4); font-style: normal; }
 
 .vl-mark { display: flex; align-items: center; gap: 9px; text-decoration: none; }
 .vl-mark:hover { text-decoration: none; }
@@ -180,16 +138,6 @@ a:hover { color: var(--vl-link); text-decoration: underline; }
 .pill-btn.ghost { background: transparent; color: var(--vl-link); }
 .pill-btn.ghost:hover { background: var(--brand-wash); color: var(--vl-link); }
 
-.icon-btn {
-  width: 34px; height: 34px; display: grid; place-items: center; cursor: pointer;
-  background: var(--panel); border: 1px solid var(--edge); border-radius: var(--r);
-  color: var(--ink-3); padding: 0;
-}
-.icon-btn:hover { color: var(--vl-link); border-color: var(--vl-link); }
-.icon-btn svg { width: 16px; height: 16px; }
-.icon-btn .moon { display: none; }
-[data-theme="dark"] .icon-btn .sun { display: none; }
-[data-theme="dark"] .icon-btn .moon { display: block; }
 
 /* ------------------------------- breadcrumb ------------------------------- */
 .crumb { background: var(--page); padding: 14px 0 10px; }

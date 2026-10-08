@@ -54,17 +54,15 @@ repointed without touching HTML. Each is resolved through Django's `reverse()` i
 [lab/context_processors.py](lab/context_processors.py), which is what keeps every breadcrumb
 entry a working link.
 
-> **Branding.** No third-party logo is reproduced. The institution crest and the *Virtual Labs*
-> wordmark are generic placeholders — replace `INSTITUTION_NAME` and the lines beneath it in
-> `lab/content.py` with your own. The footer deliberately does **not** reproduce the official
-> Virtual Labs portal links, because this is a course project rather than an official
+> **Logos.** The institution's name is set as text in `lab/content.py`. No logo image is
+> bundled — neither the institution's nor the official Virtual Labs mark — so the masthead
+> uses a plain crest glyph. Drop the real artwork into `lab/static/lab/img/` and reference it
+> from `lab/templates/lab/base.html` if you want it. The footer likewise does not reproduce the
+> official Virtual Labs portal links, because this is a course project rather than an official
 > Virtual Labs deployment.
 
-**Light and dark themes.** Every colour is a CSS custom property declared twice in
-[lab.css](lab/static/lab/css/lab.css) — once on `:root`, once under `[data-theme="dark"]`.
-Light is the default, since that is the house style; the toggle in the masthead stores the
-choice in `localStorage`, and an inline script in `<head>` applies it before first paint so the
-page never flashes.
+The lab is **light-only**, matching the house style. Every colour is a CSS custom property on
+`:root` in [lab.css](lab/static/lab/css/lab.css), so the palette can be changed from one block.
 
 ---
 

@@ -18,20 +18,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light dark">
+  <meta name="color-scheme" content="light">
   <title>{% block title %}Virtual Lab{% endblock %} | CRUD Operations on a Relational Database</title>
 
-  {# Apply the saved theme before first paint so the page never flashes. #}
-  <script>
-    (function () {
-      try {
-        document.documentElement.setAttribute(
-          'data-theme', localStorage.getItem('lab-theme') || 'light');
-      } catch (e) {
-        document.documentElement.setAttribute('data-theme', 'light');
-      }
-    })();
-  </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -43,10 +32,12 @@
 
 <header class="masthead">
   <div class="in">
-    <a class="inst" href="{% url 'lab:aim' %}">
+    <a class="inst" href="{{ institution_url }}" target="_blank" rel="noopener"
+       aria-label="{{ institution_line_1 }} home">
       <span class="crest"><svg><use href="#i-crest"></use></svg></span>
       <span class="lines">
         <b>{{ institution_name }}</b>
+        <i>{{ institution_subtitle }}</i>
         <span>{{ institution_line_1 }}</span>
         <em>{{ institution_line_2 }}</em>
       </span>
@@ -66,11 +57,6 @@
       </span>
       <a class="pill-btn" href="{% url 'lab:feedback' %}">Rate Me</a>
       <a class="pill-btn ghost" href="{% url 'lab:feedback' %}">Report a Bug</a>
-      <button class="icon-btn" id="theme-toggle" type="button"
-              title="Switch between light and dark" aria-label="Switch between light and dark">
-        <svg class="sun"><use href="#i-sun"></use></svg>
-        <svg class="moon"><use href="#i-moon"></use></svg>
-      </button>
     </div>
   </div>
 </header>
@@ -156,14 +142,6 @@
   <div class="note">{{ footer_note }}</div>
 </footer>
 
-<script>
-  document.getElementById('theme-toggle').addEventListener('click', function () {
-    var root = document.documentElement;
-    var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    root.setAttribute('data-theme', next);
-    try { localStorage.setItem('lab-theme', next); } catch (e) { /* private mode */ }
-  });
-</script>
 {% block scripts %}{% endblock %}
 </body>
 </html>
